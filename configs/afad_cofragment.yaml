@@ -1,0 +1,145 @@
+debug: False
+
+###########
+# Dataset #
+###########
+data_root: './data'
+data_name: 'afad'
+data_version: 'afad_balance1251' # 2423, 3701
+batch_size: 128
+num_workers: 8
+eval_batch_size: 128
+eval_num_workers: 4
+batch_iter: 1
+
+noise:
+  type: 'symmetric'
+  corrupt_p: 0.20 # 0.20, 0.40, 0.60
+  std: 13
+  std_min: 10
+  std_max: 10
+
+unknown_noise: False
+unknown_noise_rate: 0.80
+
+imbalance: False
+oversample: False
+
+classification: False
+label_split: [4]
+
+x_c: 3
+x_h: 128
+x_w: 128
+
+#########
+# Model #
+#########
+small_loss: True
+exponent: 1 # [0.5, 1, 2] c in Tc for R(t)
+n_gradual: 5 # num epochs for linear drop rate [5, 10, 15]. This parameter is equal to Tk for R(T) in Co-teaching paper.
+
+device: 'cuda'
+model_name: 'cofragment'
+net: 'resnet50'
+feat_dim: 0
+
+mixup:
+  active: False
+  alpha: 0.2
+
+#########
+# Train #
+#########
+
+task_epochs: 120
+
+loss: 'mse' # l1 | mse
+
+optimizer:
+  type: Adam
+  options:
+    lr: 0.001
+
+lr_scheduler:
+  type: CosineAnnealingLR
+  options:
+    eta_min: 0
+    last_epoch: -1
+
+optimizer_ft:
+  type: Adam
+  options:
+    lr: 0.002
+
+lr_scheduler_ft:
+  type: StepLR
+  options:
+    step_size: 300
+    gamma: 0.1
+
+# clip_grad:
+  # type: value
+  # options:
+#    clip_value: 0.5
+
+########
+# Eval #
+########
+eval: True
+eval_every: 1
+
+tensorboard:
+  grad: False
+
+########
+# Etc #
+########
+task_lr_reset: False
+save_weights: False
+save_every: 1 # epochs save pred clean idcs
+tqdm: False
+overwrite_log: True
+use_recent_identifier: False
+verbose: False
+
+#####################
+# Fragment Exp Flow #
+#####################
+train_expert: True # train expert and extract feature sequentially
+extract_feature: False # extract feature
+expert_filter_dataset: False
+expert_refurb_dataset: False # refurb is integrated into filter
+selective_train_regress: True
+
+expert_load: ''
+filter_load: ''
+refurb_load: ''
+
+
+######################
+# regressor training #
+######################
+regress_batch_size: 128
+regress_total_epochs: 120
+regress_model: 'covanilla'
+regress_net: 'resnet_regress'
+regress_loss: 'mse' # l1 | mse | sce | ce | mixed(for headpose)
+regress_warm_up: 0
+
+regress_optimizer:
+  type: Adam
+  options:
+    lr: 0.001
+
+online_filtering: True
+offline_filtering: False
+offline_filtering_epoch: 120
+
+regress_refurbish: False # whether use refurbished samples during regressor training
+cmixup:
+  active: False
+  batch_cmixup: False
+  manifold_mixup: False
+  kde_bandwidth: 1.5
+  beta_alpha: 1

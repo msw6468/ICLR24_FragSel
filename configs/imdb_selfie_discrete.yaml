@@ -1,0 +1,154 @@
+debug: False
+###########
+# Dataset #
+###########
+data_root: './data'
+data_name: 'imdb_wiki'
+data_version: 'clean1000' # original | clean
+batch_size: 256
+num_workers: 8
+eval_batch_size: 256
+eval_num_workers: 4
+batch_iter: 1
+
+noise:
+  type: 'symmetric'
+  corrupt_p: 0.20 # 0.20, 0.40, 0.60
+  std: 23
+  std_min: 10
+  std_max: 50
+
+label_split: [4]
+
+imbalance: False
+oversample: False
+
+x_c: 3
+x_h: 128
+x_w: 128
+
+#########
+# Model #
+#########
+device: 'cuda'
+model_name: 'selfie'
+net: 'resnet50'
+
+classification: True
+
+mixup:
+  active: False
+  alpha: 1
+
+# save refurb_idcs/refurb_y interval
+save_every: 1
+
+selfie:
+  warmup: 30 # 1/4 of total 120 epochs
+  repeat: 1 # 3
+  q: 15 # [10, 15, 20]
+  eps: 0.05 # [0.05, 0.10, 0.15, 0.20]
+
+cmixup:
+  active: False
+  batch_cmixup: False
+  manifold_mixup: False
+  kde_bandwidth: 1.5
+  beta_alpha: 1
+
+#########
+# Train #
+#########
+total_epochs: 120
+
+loss: 'ce'
+
+optimizer:
+  type: Adam
+  options:
+    lr: 0.001
+
+lr_scheduler:
+  type: CosineAnnealingLR
+  options:
+    eta_min: 0
+    last_epoch: -1
+
+optimizer_ft:
+  type: Adam
+  options:
+    lr: 0.002
+
+lr_scheduler_ft:
+  type: StepLR
+  options:
+    step_size: 300
+    gamma: 0.1
+
+# clip_grad:
+  # type: value
+  # options:
+#    clip_value: 0.5
+
+##########################
+# discrete Exp. training #
+##########################
+train_expert: True # train expert and extract feature sequentially
+filter_load: ''
+refurb_load: ''
+
+######################
+# regressor training #
+######################
+selective_train_regress: True
+regress_refurbish: True
+regress_batch_size: 256
+regress_total_epochs: 120
+regress_model: 'vanilla'
+regress_net: 'resnet50_regress'
+regress_loss: 'mse' # l1 | mse | sce | ce | mixed(for headpose)
+regress_warm_up: 30
+
+regress_optimizer:
+  type: Adam
+  options:
+    lr: 0.001
+
+regress_lr_scheduler:
+  type: CosineAnnealingLR
+  options:
+    eta_min: 0
+    last_epoch: -1
+
+regress_optimizer_ft:
+  type: Adam
+  options:
+    lr: 0.002
+
+regress_lr_scheduler_ft:
+  type: StepLR
+  options:
+    step_size: 300
+    gamma: 0.1
+
+online_filtering: True
+offline_filtering: False
+offline_filtering_epoch: 120
+
+########
+# Eval #
+########
+eval: True
+eval_every: 1
+
+tensorboard:
+  grad: False
+
+########
+# Etc #
+########
+task_lr_reset: False
+save_weights: False
+tqdm: False
+overwrite_log: True
+use_recent_identifier: True
